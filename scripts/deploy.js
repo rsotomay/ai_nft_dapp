@@ -7,18 +7,14 @@
 const hre = require("hardhat");
 
 async function main() {
-  const NAME = "GASton Token";
-  const SYMBOL = "GSNT";
-  const MAX_SUPPLY = "1000000";
+  const NAME = "AI NFT DAPP";
+  const SYMBOL = "ANFTD";
+  const COST = ethers.parseUnits("1", "ether");
 
   // Deploy Token
-  const Token = await hre.ethers.deployContract("Token", [
-    NAME,
-    SYMBOL,
-    MAX_SUPPLY,
-  ]);
-  await Token.waitForDeployment();
-  console.log(`Token Deployed to: ${Token.target}\n`);
+  const NFT = await hre.ethers.deployContract("NFT", [NAME, SYMBOL, COST]);
+  await NFT.waitForDeployment();
+  console.log(`AI NFT DAPP Deployed to: ${NFT.target}`);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

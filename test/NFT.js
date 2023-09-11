@@ -12,14 +12,13 @@ describe("NFT", () => {
   const NAME = "AI NFT DAPP";
   const SYMBOL = "ANFTD";
   const COST = tokens(1); // 1 ETH
-  const URL =
-    "https://ipfs.io/ipfs/bafyreid4an6ng6e6hok56l565eivozra3373bo6funw3p5mhq5oonew6u4/metadata.json";
+  const URL = "ipfs.io";
 
   beforeEach(async () => {
     // Setup accounts
     [deployer, minter] = await ethers.getSigners();
 
-    // Deploy Real Estate
+    // Deploy NFT contract
     const NFT = await ethers.getContractFactory("NFT");
     nft = await NFT.deploy(NAME, SYMBOL, COST);
 
