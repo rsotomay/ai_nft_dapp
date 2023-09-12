@@ -18,16 +18,16 @@ import config from "../config.json";
 
 function App() {
   const [provider, setProvider] = useState(null);
-  const [nft, setNFT] = useState(null);
   const [account, setAccount] = useState(null);
+  const [nft, setNFT] = useState(null);
 
   const [name, setName] = useState(" ");
   const [description, setDescription] = useState(" ");
   const [image, setImage] = useState(null);
+  const [url, setURL] = useState(null);
 
-  const [balance, setBalance] = useState(0);
-
-  const [isLoading, setIsLoading] = useState(true);
+  const [message, setMessage] = useState(" ");
+  const [isLoading, setIsLoading] = useState(false);
 
   const loadBlockchainData = async () => {
     // Initiate provider
@@ -44,18 +44,38 @@ function App() {
       provider
     );
     setNFT(nft);
-
-    setIsLoading(false);
   };
 
   const submitHandler = async (e) => {
     e.preventDefault();
+
+    if (!account) {
+      window.alert("Please connect your wallet");
+      return;
+    }
+
+    if (name === " " || description === " ") {
+      window.alert("Please provide a name and description");
+      return;
+    }
+
+    setIsLoading(true);
+
     // Calls the API to create image from description
     const imageData = createImage();
+
+    //Uploads image ti IPFS (NFT.Storage)
+    const url = await uploadImage(imageData);
+
+    //Mint NFT
+    await mintImage(url);
+
+    setIsLoading(false);
+    setMessage(" ");
   };
 
   const createImage = async () => {
-    console.log("Generating Image");
+    setMessage("Generating Image");
 
     // URL to API model stabilityai/stable-diffusion-2
     const URL =
@@ -77,7 +97,7 @@ function App() {
       responseType: "arraybuffer",
     });
 
-    const type = response.headers["content-type"];
+    const type = response.headers["Content-Type"];
     const data = response.data;
 
     const base64data = Buffer.from(data).toString("base64");
@@ -87,61 +107,88 @@ function App() {
     return data;
   };
 
+  const uploadImage = async (imageData) => {
+    setMessage("Uploading Image...");
+
+    //Creates instance to NFT.Storage
+    const nftstorage = new NFTStorage({
+      token: process.env.REACT_APP_NFT_STORAGE_API_KEY,
+    });
+
+    //Sends request to store image
+    const { ipnft } = await nftstorage.store({
+      image: new File([imageData], "image.jpeg", { type: "image/jpeg" }),
+      name: name,
+      description: description,
+    });
+
+    // Saves the URL
+    const url = `https://ipfs.io/ipfs/${ipnft}/metadata.json`;
+    setURL(url);
+
+    return url;
+  };
+
+  //Calls nft contract minting function
+  const mintImage = async (tokenURI) => {
+    setMessage("Waiting for mint...");
+
+    const signer = await provider.getSigner();
+    const transaction = await nft
+      .connect(signer)
+      .mint(tokenURI, { value: ethers.parseUnits("1", "ether") });
+    await transaction.wait();
+  };
+
   useEffect(() => {
-    if (isLoading) {
-      loadBlockchainData();
-    }
-  }, [isLoading]);
+    loadBlockchainData();
+  }, []);
 
   return (
     <div>
       <Navigation account={account} setAccount={setAccount} />
 
-      <Container>
-        <div className="form mx-5">
-          <form onSubmit={submitHandler}>
-            <input
-              type="text"
-              placeholder="Give your NFT a name"
-              className="my-2"
-              onChange={(e) => setName(e.target.value)}
-            ></input>
-            <div>
-              <input
-                type="text"
-                placeholder="Enter description"
-                className="my-2"
-                onChange={(e) => setDescription(e.target.value)}
-              ></input>
-            </div>
-            <Button type="submit" style={{ width: "16%" }}>
-              submit
-            </Button>
-          </form>
-          <div className="image">
-            <Row>
-              <img src={image} alt="AI NFT image" style={{ margin: "6px" }} />
-            </Row>
-          </div>
-          <p>
-            View&nbsp;
-            <a href="" target="_blank" rel="noreferrer">
-              Metadata
-            </a>
-          </p>
-        </div>
-      </Container>
+      <hr />
 
-      {/* {isLoading ? (
-        <Loading />
-      ) : (
-        <>
-          <p className="text-center">
-            <strong>Your ETH Balance:</strong> {balance} ETH
-          </p>
-          <p className="text-center">Edit App.js to add your code here.</p>
-        </>
-      )} */}
+      <Form onSubmit={submitHandler}>
+        <Form.Group style={{ maxWidth: "450px", margin: "10px auto" }}>
+          <Form.Control
+            type="text"
+            placeholder="Give your NFT a name"
+            className="my-2"
+            onChange={(e) => setName(e.target.value)}
+          />
+          <Form.Control
+            type="text"
+            placeholder="Enter description"
+            className="my-2"
+            onChange={(e) => setDescription(e.target.value)}
+          />
+          <Button type="submit" style={{ width: "40%" }}>
+            Generate Image
+          </Button>
+        </Form.Group>
+      </Form>
+
+      <Row style={{ maxWidth: "840px", margin: "10px auto" }}>
+        <div className="image">
+          {!isLoading && image ? (
+            <img src={image} alt="AI NFT image" style={{ margin: "6px" }} />
+          ) : isLoading ? (
+            <Loading message={message} />
+          ) : (
+            <></>
+          )}
+        </div>
+      </Row>
+      {!isLoading && url && (
+        <p style={{ maxWidth: "800px", margin: "auto" }}>
+          View&nbsp;
+          <a href={url} target="_blank" rel="noreferrer">
+            Metadata
+          </a>
+        </p>
+      )}
     </div>
   );
 }
