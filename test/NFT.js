@@ -30,29 +30,29 @@ describe("NFT", () => {
   describe("Deployment", () => {
     it("Returns owner", async () => {
       const result = await nft.owner();
-      expect(result).to.be.equal(deployer.address);
+      expect(result).to.equal(deployer.address);
     });
 
     it("Returns cost", async () => {
       const result = await nft.cost();
-      expect(result).to.be.equal(COST);
+      expect(result).to.equal(COST);
     });
   });
 
   describe("Minting", () => {
     it("Returns owner", async () => {
       const result = await nft.ownerOf("1");
-      expect(result).to.be.equal(minter.address);
+      expect(result).to.equal(minter.address);
     });
 
     it("Returns URI", async () => {
       const result = await nft.tokenURI("1");
-      expect(result).to.be.equal(URL);
+      expect(result).to.equal(URL);
     });
 
     it("Updates total supply", async () => {
       const result = await nft.totalSupply();
-      expect(result).to.be.equal("1");
+      expect(result).to.equal("1");
     });
   });
 

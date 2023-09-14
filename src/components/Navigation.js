@@ -33,14 +33,14 @@ const Navigation = ({ account, setAccount }) => {
         {account ? (
           <Navbar.Text
             className="d-inline-block align-top mx-5"
-            style={{ color: "gold", fontSize: 18 }}
+            style={{ color: "black", fontSize: 25 }}
           >
             {account.slice(0, 5) + "..." + account.slice(38, 42)}
           </Navbar.Text>
         ) : (
           <Button
+            variant="dark"
             className="d-inline-block align-top mx-5"
-            style={{ backgroundColor: "black" }}
             onClick={connectHandler}
           >
             Connect Your Wallet
