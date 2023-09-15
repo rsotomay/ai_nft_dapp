@@ -1,9 +1,6 @@
-import InputGroup from "react-bootstrap/InputGroup";
-import Button from "react-bootstrap/Button";
-
-function ImageLoader({ selectedImage, setSelectedImage }) {
+function ImageLoader({ setSelectedImage }) {
   // Function to handle when a user selects an image
-  const handleImageChange = (e) => {
+  const imageLoaderHandler = (e) => {
     const file = e.target.files[0]; // Get the first selected file
 
     if (file) {
@@ -21,13 +18,13 @@ function ImageLoader({ selectedImage, setSelectedImage }) {
 
   return (
     <div className="text-center">
-      <h2>Load your image</h2>
+      <h2>Upload Your Existing Image and Mint It</h2>
       <input
         className="mb-2"
         style={{ color: "blue" }}
         type="file"
         accept="image/*" // Specify that only image files are allowed
-        onChange={handleImageChange}
+        onChange={imageLoaderHandler}
       />
     </div>
   );

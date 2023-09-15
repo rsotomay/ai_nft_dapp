@@ -2,7 +2,7 @@ import Navbar from "react-bootstrap/Navbar";
 import { ethers } from "ethers";
 import Button from "react-bootstrap/Button";
 
-import logo from "../logo_GSNT.png";
+import logo from "../lion_logo.png";
 
 const Navigation = ({ account, setAccount }) => {
   const connectHandler = async () => {
@@ -19,8 +19,8 @@ const Navigation = ({ account, setAccount }) => {
       <img
         alt="logo"
         src={logo}
-        width="60"
-        height="60"
+        width="140"
+        height="140"
         className="d-inline-block align-top mx-5"
       />
       <Navbar.Brand
@@ -40,6 +40,7 @@ const Navigation = ({ account, setAccount }) => {
         ) : (
           <Button
             variant="dark"
+            style={{ fontSize: 20, width: "20%", margin: "3px" }}
             className="d-inline-block align-top mx-5"
             onClick={connectHandler}
           >
