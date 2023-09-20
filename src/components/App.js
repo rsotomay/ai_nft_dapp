@@ -8,6 +8,7 @@ import Button from "react-bootstrap/Button";
 import Row from "react-bootstrap/Row";
 import { ethers } from "ethers";
 import axios from "axios";
+import background2 from "../background2.avif";
 
 // Components
 import Navigation from "./Navigation";
@@ -178,74 +179,110 @@ function App() {
   }, []);
 
   return (
-    <div>
+    <div
+      style={{
+        WebkitBackgroundSize: "cover",
+        minHeight: "100vh",
+        backgroundPosition: "bottom",
+        backgroundImage: `url(${background2})`,
+      }}
+    >
       <Navigation account={account} setAccount={setAccount} />
 
-      <Row>
-        <Col xs={6} md={6}>
+      <div>
+        <p
+          className="text-center mx-5"
+          style={{ fontSize: 20, color: "silver", padding: "2rem" }}
+        >
+          DecentralArt-AI invites you to be the mastermind behind your digital
+          masterpieces. Simply provide a prompt, and our cutting-edge AI
+          algorithms will spring into action, crafting stunning and unique
+          artworks tailored to your vision. Whether you seek abstract beauty,
+          vibrant landscapes, or futuristic designs, DecentralArt-AI transforms
+          your ideas into captivating visual wonders.
+        </p>
+      </div>
+
+      <Row xs={1} md={2} className="g-2" style={{ padding: "1rem" }}>
+        <Col>
           {selectedImage ? (
             <></>
           ) : (
             <>
+              <h2 className="text-center" style={{ color: "silver" }}>
+                Use AI to Generate Images That You Can Mint
+              </h2>
               <Form onSubmit={submitHandler}>
-                <Form.Group style={{ maxWidth: "450px", margin: "10px auto" }}>
+                <Form.Group style={{ width: "28rem", margin: "10px auto" }}>
                   <Form.Control
+                    size="lg"
                     type="text"
-                    style={{ fontSize: 20 }}
-                    placeholder="Give your NFT a name"
+                    placeholder="Give your image a name"
                     className="my-2"
                     onChange={(e) => setName(e.target.value)}
+                    disabled={image}
                   />
                   <Form.Control
+                    size="lg"
                     type="text"
-                    style={{ fontSize: 20 }}
-                    placeholder="Enter description"
+                    placeholder="Describe the image you wish to create"
                     className="my-2"
                     onChange={(e) => setDescription(e.target.value)}
+                    disabled={image}
                   />
                   {!isLoading && !image ? (
                     <Button
                       type="submit"
                       variant="outline-primary"
-                      style={{ fontSize: 20, width: "100%", margin: "3px" }}
+                      style={{ fontSize: 20, width: "99%", margin: "3px" }}
                     >
                       Generate Image
                     </Button>
-                  ) : !isLoading && image ? (
-                    <Button
-                      onClick={refreshHandler}
-                      variant="outline-danger"
-                      style={{ fontSize: 20, width: "100%", margin: "3px" }}
-                    >
-                      Start Over
-                    </Button>
                   ) : (
-                    <></>
+                    !isLoading && image && <></>
                   )}
                 </Form.Group>
               </Form>
 
               <Card
-                border="success"
-                style={{ width: "40rem", margin: "10px auto" }}
+                className="bg-dark text-white"
+                border="info"
+                style={{
+                  width: "28rem",
+                  margin: "10px auto",
+                }}
               >
                 <div className="image">
                   {!isLoading && url && image ? (
                     <>
+                      <Button
+                        onClick={refreshHandler}
+                        variant="outline-light"
+                        style={{ fontSize: 20, width: "99%", margin: "3px" }}
+                      >
+                        Start Over to Mint More
+                      </Button>
                       <Card.Text
                         className="text-center"
                         style={{ fontSize: 20 }}
                       >
-                        🎉🎊 CONGRATS!!🎊🎉 Your NFT has been minted.
+                        🎉🎊 CONGRATS!!🎊🎉 You have minted your NFT.
                       </Card.Text>
                       <Card.Img src={image} />
                     </>
                   ) : !isLoading && !url && image ? (
                     <>
                       <Button
+                        onClick={refreshHandler}
+                        variant="outline-danger"
+                        style={{ fontSize: 20, width: "99%", margin: "3px" }}
+                      >
+                        Start Over
+                      </Button>
+                      <Button
                         onClick={mintHandler}
                         variant="outline-success"
-                        style={{ fontSize: 20, width: "99%", margin: "1px" }}
+                        style={{ fontSize: 20, width: "99%", margin: "3px" }}
                       >
                         Mint it
                       </Button>
@@ -271,7 +308,7 @@ function App() {
             </>
           )}
         </Col>
-        <Col xs={6} md={6}>
+        <Col>
           {image ? (
             <></>
           ) : (
@@ -281,9 +318,15 @@ function App() {
                 setSelectedImage={setSelectedImage}
               />
 
+              <br />
+
               <Card
-                border="success"
-                style={{ width: "40rem", margin: "93px auto" }}
+                className="bg-dark text-white"
+                border="info"
+                style={{
+                  width: "28rem",
+                  margin: "auto",
+                }}
               >
                 <div className="image">
                   {!isLoading && url && selectedImage ? (
@@ -291,7 +334,7 @@ function App() {
                       <Button
                         onClick={refreshHandler}
                         variant="outline-danger"
-                        style={{ fontSize: 20, width: "100%", margin: "3px" }}
+                        style={{ fontSize: 20, width: "99%", margin: "3px" }}
                       >
                         Start Over
                       </Button>
@@ -299,7 +342,7 @@ function App() {
                         className="text-center"
                         style={{ fontSize: 20 }}
                       >
-                        🎉🎊 CONGRATS!!🎊🎉 Your NFT has been minted.
+                        🎉🎊 CONGRATS!!🎊🎉 You have minted your NFT.
                       </Card.Text>
                       <Card.Img src={selectedImage} />
                     </>
@@ -308,14 +351,14 @@ function App() {
                       <Button
                         onClick={refreshHandler}
                         variant="outline-danger"
-                        style={{ fontSize: 20, width: "100%", margin: "3px" }}
+                        style={{ fontSize: 20, width: "99%", margin: "3px" }}
                       >
                         Start Over
                       </Button>
                       <Button
                         onClick={mintHandler}
                         variant="outline-success"
-                        style={{ fontSize: 20, width: "100%", margin: "3px" }}
+                        style={{ fontSize: 20, width: "99%", margin: "3px" }}
                       >
                         Mint it
                       </Button>

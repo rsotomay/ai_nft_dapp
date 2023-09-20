@@ -1,3 +1,5 @@
+import Form from "react-bootstrap/Form";
+
 function ImageLoader({ setSelectedImage }) {
   // Function to handle when a user selects an image
   const imageLoaderHandler = (e) => {
@@ -18,14 +20,20 @@ function ImageLoader({ setSelectedImage }) {
 
   return (
     <div className="text-center">
-      <h2>Upload Your Existing Image and Mint It</h2>
-      <input
-        className="mb-2"
-        style={{ color: "blue" }}
-        type="file"
-        accept="image/*" // Specify that only image files are allowed
-        onChange={imageLoaderHandler}
-      />
+      <h2 style={{ color: "silver" }}>Upload An Image And Mint It</h2>
+      <Form.Group
+        controlId="formFileLg"
+        className="mb-1"
+        style={{ width: "28rem", margin: "auto" }}
+      >
+        <Form.Control
+          type="file"
+          size="lg"
+          style={{ color: "blue" }}
+          accept="image/*" // Specify that only image files are allowed
+          onChange={imageLoaderHandler}
+        />
+      </Form.Group>
     </div>
   );
 }
