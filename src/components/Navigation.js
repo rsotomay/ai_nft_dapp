@@ -1,11 +1,11 @@
-import Container from "react-bootstrap/Container";
 import Navbar from "react-bootstrap/Navbar";
+import Row from "react-bootstrap/Row";
 import { ethers } from "ethers";
 import Button from "react-bootstrap/Button";
 
 import logo from "../lion_logo.png";
 
-const Navigation = ({ account, setAccount }) => {
+const Navigation = ({ account, setAccount, nft, balance, setBalance }) => {
   const connectHandler = async () => {
     // Fetch accounts
     const accounts = await window.ethereum.request({
@@ -13,6 +13,9 @@ const Navigation = ({ account, setAccount }) => {
     });
     const account = ethers.getAddress(accounts[0]);
     setAccount(account);
+
+    //Fetch Balance
+    setBalance(await nft.balanceOf(account));
   };
 
   return (
@@ -37,6 +40,10 @@ const Navigation = ({ account, setAccount }) => {
             style={{ color: "silver", fontSize: 20 }}
           >
             {account.slice(0, 5) + "..." + account.slice(38, 42)}
+            <p className="my-1">
+              <strong className="mx-1">You Own:</strong>
+              {balance.toString()} NFTs
+            </p>
           </Navbar.Text>
         ) : (
           <Button

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NFTStorage, File } from "nft.storage";
 import { Buffer } from "buffer";
+import Container from "react-bootstrap/Container";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Card from "react-bootstrap/Card";
@@ -8,7 +9,7 @@ import Button from "react-bootstrap/Button";
 import Row from "react-bootstrap/Row";
 import { ethers } from "ethers";
 import axios from "axios";
-import background2 from "../background2.avif";
+import background from "../background.avif";
 
 // Components
 import Navigation from "./Navigation";
@@ -25,6 +26,8 @@ function App() {
   const [provider, setProvider] = useState(null);
   const [account, setAccount] = useState(null);
   const [nft, setNFT] = useState(null);
+  const [cost, setCost] = useState(0);
+  const [balance, setBalance] = useState(0);
   const [selectedImage, setSelectedImage] = useState(null);
 
   const [name, setName] = useState(" ");
@@ -50,6 +53,14 @@ function App() {
       provider
     );
     setNFT(nft);
+
+    //Fetch Cost
+    setCost(await nft.cost());
+
+    // Fetch current account from Metamask when changed
+    window.ethereum.on("accountsChanged", async () => {
+      setAccount(account);
+    });
   };
 
   const submitHandler = async (e) => {
@@ -179,213 +190,229 @@ function App() {
   }, []);
 
   return (
-    <div
-      style={{
-        WebkitBackgroundSize: "cover",
-        minHeight: "100vh",
-        backgroundPosition: "bottom",
-        backgroundImage: `url(${background2})`,
-      }}
-    >
-      <Navigation account={account} setAccount={setAccount} />
+    <Container>
+      <div
+        style={{
+          WebkitBackgroundSize: "cover",
+          minHeight: "100vh",
+          backgroundPosition: "bottom",
+          backgroundImage: `url(${background})`,
+        }}
+      >
+        <Navigation
+          account={account}
+          setAccount={setAccount}
+          nft={nft}
+          balance={balance}
+          setBalance={setBalance}
+        />
 
-      <div>
-        <p
-          className="text-center mx-5"
-          style={{ fontSize: 20, color: "silver", padding: "2rem" }}
-        >
-          DecentralArt-AI invites you to be the mastermind behind your digital
-          masterpieces. Simply provide a prompt, and our cutting-edge AI
-          algorithms will spring into action, crafting stunning and unique
-          artworks tailored to your vision. Whether you seek abstract beauty,
-          vibrant landscapes, or futuristic designs, DecentralArt-AI transforms
-          your ideas into captivating visual wonders.
-        </p>
+        <div>
+          <p className="text-end mx-5" style={{ color: "silver" }}>
+            <strong className="mx-1">Cost to Mint:</strong>
+            {ethers.formatUnits(cost, "ether")} ETH
+          </p>
+          <p
+            className="text-center mx-5"
+            style={{ fontSize: 20, color: "silver", padding: "2rem" }}
+          >
+            DecentralArt-AI invites you to be the mastermind behind your digital
+            masterpieces. Simply provide a prompt, and our cutting-edge AI
+            algorithms will spring into action, crafting stunning and unique
+            artworks tailored to your vision. Whether you seek abstract beauty,
+            vibrant landscapes, or futuristic designs, DecentralArt-AI
+            transforms your ideas into captivating visual wonders.
+          </p>
+        </div>
+
+        <Row xs={1} md={2} className="g-2" style={{ padding: "1rem" }}>
+          <Col>
+            {selectedImage ? (
+              <></>
+            ) : (
+              <>
+                <h2 className="text-center" style={{ color: "silver" }}>
+                  Use AI to Generate Images That You Can Mint
+                </h2>
+                <Form onSubmit={submitHandler}>
+                  <Form.Group style={{ width: "28rem", margin: "10px auto" }}>
+                    <Form.Control
+                      size="lg"
+                      type="text"
+                      placeholder="Give your image a name"
+                      className="my-2"
+                      onChange={(e) => setName(e.target.value)}
+                      disabled={image}
+                    />
+                    <Form.Control
+                      size="lg"
+                      type="text"
+                      placeholder="Describe the image you wish to create"
+                      className="my-2"
+                      onChange={(e) => setDescription(e.target.value)}
+                      disabled={image}
+                    />
+                    {!isLoading && !image ? (
+                      <Button
+                        type="submit"
+                        variant="outline-primary"
+                        style={{ fontSize: 20, width: "99%", margin: "3px" }}
+                      >
+                        Generate Image
+                      </Button>
+                    ) : (
+                      !isLoading && image && <></>
+                    )}
+                  </Form.Group>
+                </Form>
+
+                <Card
+                  className="bg-dark text-white"
+                  border="info"
+                  style={{
+                    width: "28rem",
+                    margin: "10px auto",
+                  }}
+                >
+                  <div className="image">
+                    {!isLoading && url && image ? (
+                      <>
+                        <Button
+                          onClick={refreshHandler}
+                          variant="outline-light"
+                          style={{ fontSize: 20, width: "99%", margin: "3px" }}
+                        >
+                          Start Over to Mint More
+                        </Button>
+                        <Card.Text
+                          className="text-center"
+                          style={{ fontSize: 20 }}
+                        >
+                          🎉🎊 CONGRATS!!🎊🎉 You have minted your NFT.
+                        </Card.Text>
+                        <Card.Img src={image} />
+                      </>
+                    ) : !isLoading && !url && image ? (
+                      <>
+                        <Button
+                          onClick={refreshHandler}
+                          variant="outline-danger"
+                          style={{ fontSize: 20, width: "99%", margin: "3px" }}
+                        >
+                          Start Over
+                        </Button>
+                        <Button
+                          onClick={mintHandler}
+                          variant="outline-success"
+                          style={{ fontSize: 20, width: "99%", margin: "3px" }}
+                        >
+                          Mint it
+                        </Button>
+                        <Card.Img src={image} />
+                      </>
+                    ) : !selectedImage && isLoading ? (
+                      <Loading message={message} />
+                    ) : (
+                      <Card.Text
+                        className="text-center"
+                        style={{ fontSize: 20 }}
+                      >
+                        Your AI generated image will apear here.
+                      </Card.Text>
+                    )}
+                  </div>
+                  {!isLoading && image && url && (
+                    <p style={{ maxWidth: "800px", margin: "auto" }}>
+                      View&nbsp;
+                      <a href={url} target="_blank" rel="noreferrer">
+                        Metadata
+                      </a>
+                    </p>
+                  )}
+                </Card>
+              </>
+            )}
+          </Col>
+          <Col>
+            {image ? (
+              <></>
+            ) : (
+              <>
+                <ImageLoader
+                  selectedImage={selectedImage}
+                  setSelectedImage={setSelectedImage}
+                />
+
+                <Card
+                  className="bg-dark text-white my-3"
+                  border="info"
+                  style={{
+                    width: "28rem",
+                    margin: "auto",
+                  }}
+                >
+                  <div className="image">
+                    {!isLoading && url && selectedImage ? (
+                      <>
+                        <Button
+                          onClick={refreshHandler}
+                          variant="outline-light"
+                          style={{ fontSize: 20, width: "99%", margin: "3px" }}
+                        >
+                          Start Over to Mint More
+                        </Button>
+                        <Card.Text
+                          className="text-center"
+                          style={{ fontSize: 20 }}
+                        >
+                          🎉🎊 CONGRATS!!🎊🎉 You have minted your NFT.
+                        </Card.Text>
+                        <Card.Img src={selectedImage} />
+                      </>
+                    ) : !isLoading && !url && selectedImage ? (
+                      <>
+                        <Button
+                          onClick={refreshHandler}
+                          variant="outline-danger"
+                          style={{ fontSize: 20, width: "99%", margin: "3px" }}
+                        >
+                          Start Over
+                        </Button>
+                        <Button
+                          onClick={mintHandler}
+                          variant="outline-success"
+                          style={{ fontSize: 20, width: "99%", margin: "3px" }}
+                        >
+                          Mint it
+                        </Button>
+                        <Card.Img src={selectedImage} />
+                      </>
+                    ) : selectedImage && isLoading ? (
+                      <Loading message={message} />
+                    ) : (
+                      <Card.Text
+                        className="text-center"
+                        style={{ fontSize: 20 }}
+                      >
+                        Your selected image will apear here.
+                      </Card.Text>
+                    )}
+                  </div>
+                  {!isLoading && selectedImage && url && (
+                    <p style={{ maxWidth: "800px", margin: "auto" }}>
+                      View&nbsp;
+                      <a href={url} target="_blank" rel="noreferrer">
+                        Metadata
+                      </a>
+                    </p>
+                  )}
+                </Card>
+              </>
+            )}
+          </Col>
+        </Row>
       </div>
-
-      <Row xs={1} md={2} className="g-2" style={{ padding: "1rem" }}>
-        <Col>
-          {selectedImage ? (
-            <></>
-          ) : (
-            <>
-              <h2 className="text-center" style={{ color: "silver" }}>
-                Use AI to Generate Images That You Can Mint
-              </h2>
-              <Form onSubmit={submitHandler}>
-                <Form.Group style={{ width: "28rem", margin: "10px auto" }}>
-                  <Form.Control
-                    size="lg"
-                    type="text"
-                    placeholder="Give your image a name"
-                    className="my-2"
-                    onChange={(e) => setName(e.target.value)}
-                    disabled={image}
-                  />
-                  <Form.Control
-                    size="lg"
-                    type="text"
-                    placeholder="Describe the image you wish to create"
-                    className="my-2"
-                    onChange={(e) => setDescription(e.target.value)}
-                    disabled={image}
-                  />
-                  {!isLoading && !image ? (
-                    <Button
-                      type="submit"
-                      variant="outline-primary"
-                      style={{ fontSize: 20, width: "99%", margin: "3px" }}
-                    >
-                      Generate Image
-                    </Button>
-                  ) : (
-                    !isLoading && image && <></>
-                  )}
-                </Form.Group>
-              </Form>
-
-              <Card
-                className="bg-dark text-white"
-                border="info"
-                style={{
-                  width: "28rem",
-                  margin: "10px auto",
-                }}
-              >
-                <div className="image">
-                  {!isLoading && url && image ? (
-                    <>
-                      <Button
-                        onClick={refreshHandler}
-                        variant="outline-light"
-                        style={{ fontSize: 20, width: "99%", margin: "3px" }}
-                      >
-                        Start Over to Mint More
-                      </Button>
-                      <Card.Text
-                        className="text-center"
-                        style={{ fontSize: 20 }}
-                      >
-                        🎉🎊 CONGRATS!!🎊🎉 You have minted your NFT.
-                      </Card.Text>
-                      <Card.Img src={image} />
-                    </>
-                  ) : !isLoading && !url && image ? (
-                    <>
-                      <Button
-                        onClick={refreshHandler}
-                        variant="outline-danger"
-                        style={{ fontSize: 20, width: "99%", margin: "3px" }}
-                      >
-                        Start Over
-                      </Button>
-                      <Button
-                        onClick={mintHandler}
-                        variant="outline-success"
-                        style={{ fontSize: 20, width: "99%", margin: "3px" }}
-                      >
-                        Mint it
-                      </Button>
-                      <Card.Img src={image} />
-                    </>
-                  ) : !selectedImage && isLoading ? (
-                    <Loading message={message} />
-                  ) : (
-                    <Card.Text className="text-center" style={{ fontSize: 20 }}>
-                      Your AI generated image will apear here.
-                    </Card.Text>
-                  )}
-                </div>
-                {!isLoading && image && url && (
-                  <p style={{ maxWidth: "800px", margin: "auto" }}>
-                    View&nbsp;
-                    <a href={url} target="_blank" rel="noreferrer">
-                      Metadata
-                    </a>
-                  </p>
-                )}
-              </Card>
-            </>
-          )}
-        </Col>
-        <Col>
-          {image ? (
-            <></>
-          ) : (
-            <>
-              <ImageLoader
-                selectedImage={selectedImage}
-                setSelectedImage={setSelectedImage}
-              />
-
-              <br />
-
-              <Card
-                className="bg-dark text-white"
-                border="info"
-                style={{
-                  width: "28rem",
-                  margin: "auto",
-                }}
-              >
-                <div className="image">
-                  {!isLoading && url && selectedImage ? (
-                    <>
-                      <Button
-                        onClick={refreshHandler}
-                        variant="outline-danger"
-                        style={{ fontSize: 20, width: "99%", margin: "3px" }}
-                      >
-                        Start Over
-                      </Button>
-                      <Card.Text
-                        className="text-center"
-                        style={{ fontSize: 20 }}
-                      >
-                        🎉🎊 CONGRATS!!🎊🎉 You have minted your NFT.
-                      </Card.Text>
-                      <Card.Img src={selectedImage} />
-                    </>
-                  ) : !isLoading && !url && selectedImage ? (
-                    <>
-                      <Button
-                        onClick={refreshHandler}
-                        variant="outline-danger"
-                        style={{ fontSize: 20, width: "99%", margin: "3px" }}
-                      >
-                        Start Over
-                      </Button>
-                      <Button
-                        onClick={mintHandler}
-                        variant="outline-success"
-                        style={{ fontSize: 20, width: "99%", margin: "3px" }}
-                      >
-                        Mint it
-                      </Button>
-                      <Card.Img src={selectedImage} />
-                    </>
-                  ) : selectedImage && isLoading ? (
-                    <Loading message={message} />
-                  ) : (
-                    <Card.Text className="text-center" style={{ fontSize: 20 }}>
-                      Your selected image will apear here.
-                    </Card.Text>
-                  )}
-                </div>
-                {!isLoading && selectedImage && url && (
-                  <p style={{ maxWidth: "800px", margin: "auto" }}>
-                    View&nbsp;
-                    <a href={url} target="_blank" rel="noreferrer">
-                      Metadata
-                    </a>
-                  </p>
-                )}
-              </Card>
-            </>
-          )}
-        </Col>
-      </Row>
-    </div>
+    </Container>
   );
 }
 
