@@ -52,7 +52,7 @@ Open terminal and enter the following commands:
 
 ### Run tests using Hardhat:
 
-`$npx hardhat test`
+`$ npx hardhat test`
 
 ### Create an .env file in your project to securely store API keys
 
@@ -66,7 +66,9 @@ To connect with NFT.Storage and upload the image to IPFS and store the NFTs go t
 
 ### Start a Hardhat node for local development:
 
-`$npx hardhat node`
+Open a separate terminal window and run:
+
+`$ npx hardhat node`
 
 ### Deploy the smart contract to your local Hardhat node:
 
@@ -74,6 +76,8 @@ To connect with NFT.Storage and upload the image to IPFS and store the NFTs go t
 
 ### Run the front-end application:
 
-`$npm run start`
+Open a separate terminal window and run:
+
+`$ npm run start`
 
 Happy minting and creating with DecentralArt-AI! 🎨🚀
