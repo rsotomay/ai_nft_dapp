@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 
 contract NFT is ERC721URIStorage {
     using Counters for Counters.Counter;
-    Counters.Counter private _tokenIds;
+    Counters.Counter private tokenIdCounter;
 
     address public owner;
     uint256 public cost;
@@ -21,18 +21,28 @@ contract NFT is ERC721URIStorage {
         cost = _cost;
     }
 
-    function mint(string memory tokenURI) public payable {
+      // Mapping from owner to list of owned token IDs
+    mapping(address => string[]) private ownedTokens;
+
+    function mint(string memory _tokenUri) public payable {
         require(msg.value >= cost);
 
-        _tokenIds.increment();
+        tokenIdCounter.increment();
 
-        uint256 newItemId = _tokenIds.current();
+        uint256 newItemId = tokenIdCounter.current();
         _mint(msg.sender, newItemId);
-        _setTokenURI(newItemId, tokenURI);
+        _setTokenURI(newItemId, _tokenUri);
+        // Add the new token to the owner's list of owned tokens
+        ownedTokens[msg.sender].push(_tokenUri);
     }
 
+    //Returns all NFTs owned by an owner by token Ids
+        function walletOfOwner(address _owner) public view returns(string[] memory) {
+            return ownedTokens[_owner];
+        }
+
     function totalSupply() public view returns (uint256) {
-        return _tokenIds.current();
+        return tokenIdCounter.current();
     }
 
     function withdraw() public {

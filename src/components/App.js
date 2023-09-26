@@ -28,7 +28,9 @@ function App() {
   const [nft, setNFT] = useState(null);
   const [cost, setCost] = useState(0);
   const [balance, setBalance] = useState(0);
+  const [totalSupply, setTotalSupply] = useState(0);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [listOfNFTs, setListOfNFTs] = useState(0);
 
   const [name, setName] = useState(" ");
   const [description, setDescription] = useState(" ");
@@ -56,6 +58,9 @@ function App() {
 
     //Fetch Cost
     setCost(await nft.cost());
+
+    //Fetch total supply
+    setTotalSupply(await nft.totalSupply());
 
     // Fetch current account from Metamask when changed
     window.ethereum.on("accountsChanged", async () => {
@@ -90,6 +95,11 @@ function App() {
 
     if (!account) {
       window.alert("Please connect your wallet");
+      return;
+    }
+
+    if (name === " " || description === " ") {
+      window.alert("Please provide a name and description");
       return;
     }
 
@@ -163,7 +173,8 @@ function App() {
     });
 
     // Saves the URL
-    const url = `https://ipfs.io/ipfs/${ipnft}/metadata.json`;
+    // const url = `https://ipfs.io/ipfs/${ipnft}/metadata.json`;
+    const url = `https://gateway.pinata.cloud/ipfs/${ipnft}/image/image.jpeg`;
     setURL(url);
 
     return url;
@@ -205,12 +216,17 @@ function App() {
           nft={nft}
           balance={balance}
           setBalance={setBalance}
+          setListOfNFTs={setListOfNFTs}
         />
 
         <div>
           <p className="text-end mx-5" style={{ color: "silver" }}>
             <strong className="mx-1">Cost to Mint:</strong>
             {ethers.formatUnits(cost, "ether")} ETH
+          </p>
+          <p className="text-end mx-5" style={{ color: "silver" }}>
+            <strong className="mx-1">Total Supply:</strong>
+            {totalSupply.toString()} NFTs
           </p>
           <p
             className="text-center mx-5"
@@ -338,10 +354,42 @@ function App() {
               <></>
             ) : (
               <>
-                <ImageLoader
-                  selectedImage={selectedImage}
-                  setSelectedImage={setSelectedImage}
-                />
+                <ImageLoader setSelectedImage={setSelectedImage} />
+
+                <Form onSubmit={mintHandler}>
+                  <Form.Group style={{ width: "28rem", margin: "10px auto" }}>
+                    <Form.Control
+                      size="lg"
+                      type="text"
+                      placeholder="Give your image a name"
+                      className="my-2"
+                      onChange={(e) => setName(e.target.value)}
+                      disabled={url}
+                    />
+                    <Form.Control
+                      size="lg"
+                      type="text"
+                      placeholder="Description"
+                      className="my-2"
+                      onChange={(e) => setDescription(e.target.value)}
+                      disabled={url}
+                    />
+                    {!isLoading && selectedImage && url ? (
+                      <></>
+                    ) : (
+                      !isLoading &&
+                      selectedImage && (
+                        <Button
+                          type="submit"
+                          variant="outline-success"
+                          style={{ fontSize: 20, width: "99%", margin: "3px" }}
+                        >
+                          Mint it
+                        </Button>
+                      )
+                    )}
+                  </Form.Group>
+                </Form>
 
                 <Card
                   className="bg-dark text-white my-3"
@@ -378,13 +426,6 @@ function App() {
                         >
                           Start Over
                         </Button>
-                        <Button
-                          onClick={mintHandler}
-                          variant="outline-success"
-                          style={{ fontSize: 20, width: "99%", margin: "3px" }}
-                        >
-                          Mint it
-                        </Button>
                         <Card.Img src={selectedImage} />
                       </>
                     ) : selectedImage && isLoading ? (
@@ -410,6 +451,30 @@ function App() {
               </>
             )}
           </Col>
+        </Row>
+        <Row>
+          {listOfNFTs.length > 0 ? (
+            <>
+              <h2 className="my-2 text-center" style={{ color: "silver" }}>
+                Your collection
+              </h2>
+              <div className="text-center" style={{ color: "silver" }}>
+                {listOfNFTs.map((nftId) => (
+                  <img
+                    key={nftId}
+                    style={{ margin: "6px" }}
+                    className="my-3"
+                    src={nftId}
+                    alt={`NFT ${nftId}`}
+                    width="50px"
+                    height="50px"
+                  />
+                ))}
+              </div>
+            </>
+          ) : (
+            <></>
+          )}
         </Row>
       </div>
     </Container>

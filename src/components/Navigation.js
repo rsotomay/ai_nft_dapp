@@ -4,7 +4,14 @@ import Button from "react-bootstrap/Button";
 
 import logo from "../lion_logo.png";
 
-const Navigation = ({ account, setAccount, nft, balance, setBalance }) => {
+const Navigation = ({
+  account,
+  setAccount,
+  nft,
+  balance,
+  setBalance,
+  setListOfNFTs,
+}) => {
   const connectHandler = async () => {
     // Fetch accounts
     const accounts = await window.ethereum.request({
@@ -15,6 +22,11 @@ const Navigation = ({ account, setAccount, nft, balance, setBalance }) => {
 
     //Fetch Balance
     setBalance(await nft.balanceOf(account));
+
+    //Fetch wallet of owner from contract
+    if (account) {
+      setListOfNFTs(await nft.walletOfOwner(account));
+    }
   };
 
   return (
