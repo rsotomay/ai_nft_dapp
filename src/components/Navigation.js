@@ -25,7 +25,8 @@ const Navigation = ({
 
     //Fetch wallet of owner from contract
     if (account) {
-      setListOfNFTs(await nft.walletOfOwner(account));
+      const getWallet = await nft.walletOfOwner(account);
+      setListOfNFTs(getWallet);
     }
   };
 

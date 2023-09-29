@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { NFTStorage, File } from "nft.storage";
-import { Buffer } from "buffer";
 import Container from "react-bootstrap/Container";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
@@ -8,13 +7,15 @@ import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 import Row from "react-bootstrap/Row";
 import { ethers } from "ethers";
-import axios from "axios";
 import background from "../background.avif";
 
 // Components
 import Navigation from "./Navigation";
+import Data from "./Data";
+import ImageGenerator from "./ImageGenerator";
 import ImageLoader from "./ImageLoader";
 import Loading from "./Loading";
+import Collection from "./Collection";
 
 // ABIs: Import your contract ABIs here
 import NFT_ABI from "../abis/NFT.json";
@@ -29,13 +30,16 @@ function App() {
   const [cost, setCost] = useState(0);
   const [balance, setBalance] = useState(0);
   const [totalSupply, setTotalSupply] = useState(0);
+  const [selectedImageData, setSelectedImageData] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [listOfNFTs, setListOfNFTs] = useState(0);
 
   const [name, setName] = useState(" ");
   const [description, setDescription] = useState(" ");
   const [image, setImage] = useState(null);
-  const [url, setURL] = useState(null);
+  const [imageData, setImageData] = useState(null);
+  const [url, setUrl] = useState(null);
+  const [metaData, setMetaData] = useState(null);
 
   const [message, setMessage] = useState(" ");
   const [isLoading, setIsLoading] = useState(false);
@@ -68,28 +72,6 @@ function App() {
     });
   };
 
-  const submitHandler = async (e) => {
-    e.preventDefault();
-
-    if (!account) {
-      window.alert("Please connect your wallet");
-      return;
-    }
-
-    if (name === " " || description === " ") {
-      window.alert("Please provide a name and description");
-      return;
-    }
-
-    setIsLoading(true);
-
-    // Calls the API to create image from description
-    await createImage();
-
-    setIsLoading(false);
-    setMessage(" ");
-  };
-
   const mintHandler = async (e) => {
     e.preventDefault();
 
@@ -106,55 +88,22 @@ function App() {
     if (image) {
       setIsLoading(true);
       //Uploads image to IPFS (NFT.Storage)
-      const url = await uploadImage(image);
+      const imageUrl = await uploadImage(imageData);
 
       //Mint NFT
-      await mintImage(url);
+      await mintImage(imageUrl);
 
       setIsLoading(false);
       setMessage(" ");
     } else if (selectedImage) {
       setIsLoading(true);
 
-      const url = await uploadImage(ImageLoader.file);
+      const selectedImageUrl = await uploadImage(selectedImageData);
 
-      await mintImage(url);
+      await mintImage(selectedImageUrl);
       setIsLoading(false);
       setMessage(" ");
     }
-  };
-
-  const createImage = async () => {
-    setMessage("Generating Image");
-
-    // URL to API model stabilityai/stable-diffusion-2
-    const URL =
-      "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2";
-
-    //Sends API request
-    const response = await axios({
-      url: URL,
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.REACT_APP_HUGGING_FACE_API_KEY}`,
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      data: JSON.stringify({
-        inputs: description,
-        options: { wait_for_model: true },
-      }),
-      responseType: "arraybuffer",
-    });
-
-    const type = response.headers["Content-Type"];
-    const data = response.data;
-
-    const base64data = Buffer.from(data).toString("base64");
-    const img = `data:${type};base64,` + base64data;
-    setImage(img);
-
-    return data;
   };
 
   const uploadImage = async (imageData) => {
@@ -173,9 +122,10 @@ function App() {
     });
 
     // Saves the URL
-    // const url = `https://ipfs.io/ipfs/${ipnft}/metadata.json`;
-    const url = `https://gateway.pinata.cloud/ipfs/${ipnft}/image/image.jpeg`;
-    setURL(url);
+    const url = `https://hardbin.com/ipfs/${ipnft}/image/image.jpeg`;
+    setUrl(url);
+    const metaData = `https://gateway.pinata.cloud/ipfs/${ipnft}/metadata.json`;
+    setMetaData(metaData);
 
     return url;
   };
@@ -192,7 +142,7 @@ function App() {
   };
 
   const refreshHandler = async () => {
-    // Reload page when network changes
+    // Reload page
     window.location.reload();
   };
 
@@ -219,27 +169,7 @@ function App() {
           setListOfNFTs={setListOfNFTs}
         />
 
-        <div>
-          <p className="text-end mx-5" style={{ color: "silver" }}>
-            <strong className="mx-1">Cost to Mint:</strong>
-            {ethers.formatUnits(cost, "ether")} ETH
-          </p>
-          <p className="text-end mx-5" style={{ color: "silver" }}>
-            <strong className="mx-1">Total Supply:</strong>
-            {totalSupply.toString()} NFTs
-          </p>
-          <p
-            className="text-center mx-5"
-            style={{ fontSize: 20, color: "silver", padding: "2rem" }}
-          >
-            DecentralArt-AI invites you to be the mastermind behind your digital
-            masterpieces. Simply provide a prompt, and our cutting-edge AI
-            algorithms will spring into action, crafting stunning and unique
-            artworks tailored to your vision. Whether you seek abstract beauty,
-            vibrant landscapes, or futuristic designs, DecentralArt-AI
-            transforms your ideas into captivating visual wonders.
-          </p>
-        </div>
+        <Data cost={cost} totalSupply={totalSupply} />
 
         <Row xs={1} md={2} className="g-2" style={{ padding: "1rem" }}>
           <Col>
@@ -250,37 +180,19 @@ function App() {
                 <h2 className="text-center" style={{ color: "silver" }}>
                   Use AI to Generate Images That You Can Mint
                 </h2>
-                <Form onSubmit={submitHandler}>
-                  <Form.Group style={{ width: "28rem", margin: "10px auto" }}>
-                    <Form.Control
-                      size="lg"
-                      type="text"
-                      placeholder="Give your image a name"
-                      className="my-2"
-                      onChange={(e) => setName(e.target.value)}
-                      disabled={image}
-                    />
-                    <Form.Control
-                      size="lg"
-                      type="text"
-                      placeholder="Describe the image you wish to create"
-                      className="my-2"
-                      onChange={(e) => setDescription(e.target.value)}
-                      disabled={image}
-                    />
-                    {!isLoading && !image ? (
-                      <Button
-                        type="submit"
-                        variant="outline-primary"
-                        style={{ fontSize: 20, width: "99%", margin: "3px" }}
-                      >
-                        Generate Image
-                      </Button>
-                    ) : (
-                      !isLoading && image && <></>
-                    )}
-                  </Form.Group>
-                </Form>
+                <ImageGenerator
+                  account={account}
+                  image={image}
+                  name={name}
+                  setName={setName}
+                  description={description}
+                  setDescription={setDescription}
+                  isLoading={isLoading}
+                  setIsLoading={setIsLoading}
+                  setMessage={setMessage}
+                  setImage={setImage}
+                  setImageData={setImageData}
+                />
 
                 <Card
                   className="bg-dark text-white"
@@ -340,7 +252,7 @@ function App() {
                   {!isLoading && image && url && (
                     <p style={{ maxWidth: "800px", margin: "auto" }}>
                       View&nbsp;
-                      <a href={url} target="_blank" rel="noreferrer">
+                      <a href={metaData} target="_blank" rel="noreferrer">
                         Metadata
                       </a>
                     </p>
@@ -354,7 +266,10 @@ function App() {
               <></>
             ) : (
               <>
-                <ImageLoader setSelectedImage={setSelectedImage} />
+                <ImageLoader
+                  setSelectedImageData={setSelectedImageData}
+                  setSelectedImage={setSelectedImage}
+                />
 
                 <Form onSubmit={mintHandler}>
                   <Form.Group style={{ width: "28rem", margin: "10px auto" }}>
@@ -442,7 +357,7 @@ function App() {
                   {!isLoading && selectedImage && url && (
                     <p style={{ maxWidth: "800px", margin: "auto" }}>
                       View&nbsp;
-                      <a href={url} target="_blank" rel="noreferrer">
+                      <a href={metaData} target="_blank" rel="noreferrer">
                         Metadata
                       </a>
                     </p>
@@ -452,30 +367,7 @@ function App() {
             )}
           </Col>
         </Row>
-        <Row>
-          {listOfNFTs.length > 0 ? (
-            <>
-              <h2 className="my-2 text-center" style={{ color: "silver" }}>
-                Your collection
-              </h2>
-              <div className="text-center" style={{ color: "silver" }}>
-                {listOfNFTs.map((nftId) => (
-                  <img
-                    key={nftId}
-                    style={{ margin: "6px" }}
-                    className="my-3"
-                    src={nftId}
-                    alt={`NFT ${nftId}`}
-                    width="50px"
-                    height="50px"
-                  />
-                ))}
-              </div>
-            </>
-          ) : (
-            <></>
-          )}
-        </Row>
+        <Collection listOfNFTs={listOfNFTs} metaData={metaData} />
       </div>
     </Container>
   );

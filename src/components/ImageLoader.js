@@ -1,7 +1,7 @@
 import Form from "react-bootstrap/Form";
 
-function ImageLoader({ setSelectedImage }) {
-  // Function to handle when a user selects an image
+function ImageLoader({ setSelectedImageData, setSelectedImage }) {
+  // Function for user to load an image
   const imageLoaderHandler = (e) => {
     const file = e.target.files[0]; // Get the first selected file
 
@@ -10,12 +10,23 @@ function ImageLoader({ setSelectedImage }) {
 
       // Callback function when the file is loaded
       reader.onload = (event) => {
-        setSelectedImage(event.target.result);
+        const arrayBuffer = event.target.result;
+        setSelectedImageData(arrayBuffer);
+
+        // Create a Data URL from the ArrayBuffer
+        const dataURL = arrayBufferToDataURL(arrayBuffer);
+        setSelectedImage(dataURL);
       };
 
-      // Read the selected file as a Data URL
-      reader.readAsDataURL(file);
+      // Read the selected file as ArrayBuffer
+      reader.readAsArrayBuffer(file);
     }
+  };
+
+  // Helper function to convert ArrayBuffer to Data URL
+  const arrayBufferToDataURL = (arrayBuffer) => {
+    const blob = new Blob([arrayBuffer]);
+    return URL.createObjectURL(blob);
   };
 
   return (
