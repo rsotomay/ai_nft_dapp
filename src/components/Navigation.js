@@ -45,7 +45,7 @@ const Navigation = ({
       >
         DecentralArt-AI
       </Navbar.Brand>
-      <Navbar.Collapse className="justify-content-end">
+      <Navbar.Collapse className="d-flex justify-content-end">
         {account ? (
           <Navbar.Text
             className="d-inline-block align-top mx-5"
@@ -60,7 +60,7 @@ const Navigation = ({
         ) : (
           <Button
             variant="secondary"
-            style={{ fontSize: 20, width: "20%", margin: "3px" }}
+            style={{ fontSize: 20, width: "30%", margin: "3px" }}
             className="d-inline-block align-top mx-5"
             onClick={connectHandler}
           >

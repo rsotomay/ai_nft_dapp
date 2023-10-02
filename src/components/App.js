@@ -16,6 +16,7 @@ import ImageGenerator from "./ImageGenerator";
 import ImageLoader from "./ImageLoader";
 import Loading from "./Loading";
 import Collection from "./Collection";
+import Withdraw from "./Withdraw";
 
 // ABIs: Import your contract ABIs here
 import NFT_ABI from "../abis/NFT.json";
@@ -27,7 +28,9 @@ function App() {
   const [provider, setProvider] = useState(null);
   const [account, setAccount] = useState(null);
   const [nft, setNFT] = useState(null);
+  const [owner, setOwner] = useState(null);
   const [cost, setCost] = useState(0);
+  const [contractBalance, setContractBalance] = useState(0);
   const [balance, setBalance] = useState(0);
   const [totalSupply, setTotalSupply] = useState(0);
   const [selectedImageData, setSelectedImageData] = useState(null);
@@ -59,6 +62,12 @@ function App() {
       provider
     );
     setNFT(nft);
+
+    //Fetch contract owner
+    setOwner(await nft.owner());
+
+    //Fetch Contract Balance
+    setContractBalance(await provider.getBalance(nft.getAddress()));
 
     //Fetch Cost
     setCost(await nft.cost());
@@ -168,6 +177,18 @@ function App() {
           setBalance={setBalance}
           setListOfNFTs={setListOfNFTs}
         />
+
+        {account === owner ? (
+          <Withdraw
+            nft={nft}
+            provider={provider}
+            account={account}
+            owner={owner}
+            contractBalance={contractBalance}
+          />
+        ) : (
+          <></>
+        )}
 
         <Data cost={cost} totalSupply={totalSupply} />
 
