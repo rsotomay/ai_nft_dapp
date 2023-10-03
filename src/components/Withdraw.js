@@ -7,9 +7,15 @@ const Withdraw = ({ nft, provider, account, owner, contractBalance }) => {
     if (account !== owner) {
       window.alert("You are not the owner");
     }
+
+    if (contractBalance <= 0) {
+      window.alert("There are not enough funds");
+      window.location.reload();
+    }
     const signer = await provider.getSigner();
-    const transaction = nft.connect(signer).withdraw();
-    transaction.wait();
+    const transaction = await nft.connect(signer).withdraw();
+    await transaction.wait();
+    window.location.reload();
   };
   return (
     <div className="d-flex justify-content-end">

@@ -6,7 +6,7 @@ const Collection = ({ listOfNFTs }) => {
     <Row>
       {listOfNFTs.length > 0 ? (
         <>
-          <h2 className="my-2 text-center" style={{ color: "silver" }}>
+          <h2 className="my-1 text-center" style={{ color: "silver" }}>
             Your collection
           </h2>
           <Carousel fade>
@@ -21,8 +21,8 @@ const Collection = ({ listOfNFTs }) => {
                   alt={`NFT ${nftId}`}
                   width="250px"
                   height="250px"
+                  style={{ padding: "2rem" }}
                 />
-                <Carousel.Caption></Carousel.Caption>
               </Carousel.Item>
             ))}
           </Carousel>

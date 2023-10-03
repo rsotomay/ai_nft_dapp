@@ -388,7 +388,7 @@ function App() {
             )}
           </Col>
         </Row>
-        <Collection listOfNFTs={listOfNFTs} metaData={metaData} />
+        <Collection listOfNFTs={listOfNFTs} />
       </div>
     </Container>
   );
