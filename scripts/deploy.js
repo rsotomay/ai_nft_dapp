@@ -7,14 +7,14 @@
 const hre = require("hardhat");
 
 async function main() {
-  const NAME = "AI NFT DAPP";
-  const SYMBOL = "ANFTD";
-  const COST = ethers.parseUnits("1", "ether");
+  const NAME = "DecentralArt-AI";
+  const SYMBOL = "DAA";
+  const COST = ethers.parseUnits("0.0031", "ether");
 
   // Deploy Token
   const NFT = await hre.ethers.deployContract("NFT", [NAME, SYMBOL, COST]);
   await NFT.waitForDeployment();
-  console.log(`AI NFT DAPP Deployed to: ${NFT.target}`);
+  console.log(`DecentralArt-AI Deployed to: ${NFT.target}`);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
