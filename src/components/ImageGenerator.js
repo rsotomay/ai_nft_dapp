@@ -64,9 +64,7 @@ const ImageGenerator = ({
     const type = response.headers["content-type"];
     const data = response.data;
 
-    console.log(data);
     const base64data = Buffer.from(data).toString("base64");
-    console.log(base64data);
     const img = `data:${type};base64,` + base64data;
     setImage(img);
 

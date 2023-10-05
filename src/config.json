@@ -4,9 +4,9 @@
       "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3"
     }
   },
-  "<58008(0xe298)>": {
+  "58008(0xe298)": {
     "NFT": {
-      "address": "<DEPLOYED CONTRACT ADDRESS ON SEPOLIA>"
+      "address": "0x0B3808884D59abfDaE323ee12cC515361648f20C"
     }
   }
 }
