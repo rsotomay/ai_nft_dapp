@@ -178,7 +178,9 @@ function App() {
           setListOfNFTs={setListOfNFTs}
         />
 
-        {account === owner ? (
+        {account !== owner ? (
+          <></>
+        ) : (
           <Withdraw
             nft={nft}
             provider={provider}
@@ -186,8 +188,6 @@ function App() {
             owner={owner}
             contractBalance={contractBalance}
           />
-        ) : (
-          <></>
         )}
 
         <Data cost={cost} totalSupply={totalSupply} />
